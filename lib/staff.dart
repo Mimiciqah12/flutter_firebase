@@ -62,7 +62,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Staff'),
+        title: Text('Staff Profile Form'),
         backgroundColor: const Color.fromARGB(255, 250, 147, 181),
       ),
       body: Container(
@@ -153,7 +153,7 @@ class _StaffListPageState extends State<StaffListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Staff List'),
+        title: Text('List of Staff'),
         backgroundColor: const Color.fromARGB(255, 250, 147, 181),
       ),
       body: Container(
@@ -174,7 +174,18 @@ class _StaffListPageState extends State<StaffListPage> {
               return Center(child: CircularProgressIndicator());
             }
 
-            final docs = snapshot.data!.docs;
+            final docs =
+                snapshot.data!.docs..sort((a, b) {
+                  final nameA =
+                      (a.data() as Map<String, dynamic>)['name']
+                          .toString()
+                          .toLowerCase();
+                  final nameB =
+                      (b.data() as Map<String, dynamic>)['name']
+                          .toString()
+                          .toLowerCase();
+                  return nameA.compareTo(nameB);
+                });
 
             return ListView.builder(
               padding: EdgeInsets.all(16),
@@ -215,7 +226,40 @@ class _StaffListPageState extends State<StaffListPage> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () => _deleteStaff(docId),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (_) => AlertDialog(
+                                    title: Text('Confirm Delete'),
+                                    content: Text(
+                                      'Are you sure you want to delete this staff profile?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed:
+                                            () =>
+                                                Navigator.of(
+                                                  context,
+                                                ).pop(), // cancel
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          _deleteStaff(docId);
+                                          Navigator.of(
+                                            context,
+                                          ).pop(); // close dialog
+                                        },
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                            );
+                          },
                           icon: Icon(
                             Icons.delete,
                             color: const Color.fromARGB(255, 22, 2, 2),
